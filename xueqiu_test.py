@@ -14,21 +14,19 @@ class TestXueqiu(object):
     @classmethod
     def setup_class(cls):
         print('一个类只执行一次')
-        cls.init_appium()
-
+        cls.install_app()
 
     def setup_method(self):
         print('一个方法只执行一次')
-        TestXueqiu.driver = self.restart_appium()
-        self.driver = TestXueqiu.driver
-
+        # 获取启动后appium的driver实例
+        self.driver = self.restart_app()
 
     def test_login(self):
 
-        el1 = TestXueqiu.driver.find_element_by_id("user_profile_icon")
+        el1 = self.driver.find_element_by_id("user_profile_icon")
         el1.click()
         self.driver.implicitly_wait(6)
-        el2 = TestXueqiu.driver.find_element_by_id("com.xueqiu.android:id/iv_login_phone")
+        el2 = self.driver.find_element_by_id("com.xueqiu.android:id/iv_login_phone")
         el2.click()
 
     def test_fund(self):
@@ -68,7 +66,7 @@ class TestXueqiu(object):
 
 
     @classmethod
-    def init_appium(cls) -> WebDriver:
+    def install_app(cls) -> WebDriver:
         caps = {}
         caps["platformName"] = "android"
         caps["deviceName"] = "Redmi"
@@ -81,14 +79,18 @@ class TestXueqiu(object):
         return driver
 
     @classmethod
-    def restart_appium(cls) -> WebDriver:
+    def restart_app(cls) -> WebDriver:
         caps = {}
+        # 如果有必要，进行第一次安装
+        caps["app"] = ""
         caps["platformName"] = "android"
         caps["deviceName"] = "Redmi"
         caps["appPackage"] = "com.xueqiu.android"
         caps["appActivity"] = ".view.WelcomeActivityAlias"
+        # 第一次启动赋予权限
         caps["autoGrantPermissions"] = "true"
         # caps["unicodeKeyboard"] = "true"
+        # 保留，不清除数据
         caps["noReset"] = "true"
         driver = webdriver.Remote("http://localhost:4723/wd/hub", caps)
         driver.implicitly_wait(10)
